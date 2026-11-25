@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mortgage Interest Rate Predictor</title>
+<style>
+  body { font-family: system-ui, sans-serif; background:#f3f5f9; margin:0; padding:2rem; color:#1f2937; }
+  .card { max-width:560px; margin:auto; background:#fff; padding:2rem; border-radius:12px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  h1 { font-size:1.4rem; margin-top:0; }
+  label { display:block; margin:.9rem 0 .25rem; font-size:.9rem; font-weight:600; }
+  input, select { width:100%; padding:.6rem; border:1px solid #d1d5db; border-radius:8px; box-sizing:border-box; }
+  button { margin-top:1.4rem; width:100%; padding:.8rem; background:#2563eb; color:#fff; border:0; border-radius:8px; font-size:1rem; cursor:pointer; }
+  button:hover { background:#1d4ed8; }
+  .result { margin-top:1.5rem; padding:1rem; background:#ecfdf5; border-radius:8px; }
+  .result .rate { font-size:2rem; font-weight:700; color:#047857; }
+  .error { margin-top:1rem; padding:.8rem; background:#fef2f2; color:#b91c1c; border-radius:8px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Mortgage Interest Rate Predictor</h1>
+  <form method="post">
+    <label>Credit score (300–850)</label>
+    <input type="number" name="credit_score" min="300" max="850" value="{{ form.get('credit_score', 720) }}" required>
+    <label>Loan amount</label>
+    <input type="number" name="loan_amount" min="1" value="{{ form.get('loan_amount', 300000) }}" required>
+    <label>Property value</label>
+    <input type="number" name="property_value" min="1" value="{{ form.get('property_value', 400000) }}" required>
+    <label>Debt-to-income ratio (%)</label>
+    <input type="number" step="0.1" name="dti" value="{{ form.get('dti', 32) }}" required>
+    <label>Loan term</label>
+    <select name="loan_term">
+      {% for t in [15, 20, 30] %}
+      <option value="{{ t }}" {% if form.get('loan_term', '30')|string == t|string %}selected{% endif %}>{{ t }} years</option>
+      {% endfor %}
+    </select>
+    <label>Loan type</label>
+    <select name="loan_type">
+      {% for t in ['fixed', 'adjustable'] %}
+      <option value="{{ t }}" {% if form.get('loan_type', 'fixed') == t %}selected{% endif %}>{{ t|capitalize }}</option>
+      {% endfor %}
+    </select>
+    <label>Current market benchmark rate (%)</label>
+    <input type="number" step="0.01" name="market_rate" value="{{ form.get('market_rate', 6.5) }}" required>
+    <button type="submit">Predict Rate</button>
+  </form>
+
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+  {% if result %}
+  <div class="result">
+    <div>Predicted interest rate</div>
+    <div class="rate">{{ result.interest_rate }}%</div>
+    <p>Loan-to-value: {{ result.ltv }}%<br>
+       Estimated monthly payment: ${{ '{:,.2f}'.format(result.monthly_payment) }}<br>
+       Total paid over term: ${{ '{:,.2f}'.format(result.total_paid) }}</p>
+  </div>
+  {% endif %}
+</div>
+</body>
+</html>
